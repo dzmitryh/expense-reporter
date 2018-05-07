@@ -14,21 +14,25 @@ var targetStops = [...]string{"Schiphol Airport", "Schiphol-Rijk, Boeingavenue",
 
 func main() {
 	args := os.Args[1:]
-	if len(args) == 0 {
-		log.Fatal("input file path argument is required")
-		// do what you want
+	if len(args) != 2 {
+		log.Fatal("Arguments are requried: 1) input file path 2) output dir path")
 		return
 	}
 	inputFilePath := args[0]
 	input, inputErr := os.Open(inputFilePath)
+	checkError("Cannot open file", inputErr)
+	defer input.Close()
+
+	outputDirPath := args[1]
+	if _, err := os.Stat(outputDirPath); os.IsNotExist(err) {
+		log.Fatalf("output dir %[1]s doesn't exist", outputDirPath)
+		return
+	}
 	now := time.Now()
 	currMonth := now.Month()
 	currYear := now.Year()
-	output, outputErr := os.Create(fmt.Sprintf("transportation-compensation-bus-%[1]s-%[2]d.csv", currMonth, currYear))
-
-	checkError("Cannot open file", inputErr)
-	// automatically call Close() at the end of current method
-	defer input.Close()
+	output, outputErr := os.Create(fmt.Sprintf(
+		"%[1]s/transportation-compensation-bus-%[2]s-%[3]d.csv", outputDirPath, currMonth, currYear))
 	checkError("Cannot create file", outputErr)
 	defer output.Close()
 
