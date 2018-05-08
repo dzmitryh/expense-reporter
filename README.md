@@ -6,4 +6,4 @@ stops that specified at the beginning of main package.
 
 #### How to build/run:
 go install
-expense-reporter {inputFilePath} {outputDirPath}
+expense-reporter {inputFilePath/FileName.csv} {outputDirPath}
