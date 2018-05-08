@@ -1,3 +1,4 @@
 *.iml
 *.csv
 *.DS_Store
+.idea/
