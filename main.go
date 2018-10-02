@@ -7,10 +7,13 @@ import (
 	"io"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
-var targetStops = [...]string{"Schiphol Airport", "Schiphol-Rijk, Boeingavenue", "Schiphol-Rijk, Beechavenue"}
+var targetStopsStr = getEnv("REPORTING_BUS_STOPS",
+	"Schiphol Airport | Schiphol-Rijk, Boeingavenue | Schiphol-Rijk, Beechavenue | Schiphol, Schipholgebouw | Schiphol, P12/Vrachtgebouw")
+var targetStops = strings.Split(targetStopsStr, "|")
 
 func main() {
 	args := os.Args[1:]
@@ -59,7 +62,7 @@ func main() {
 		departure := record[2]
 		destination := record[4]
 		strPrice := record[5]
-		if inTargetStops(&targetStops, departure, destination) && strPrice != "" {
+		if inTargetStops(targetStops, departure, destination) && strPrice != "" {
 			writeInFile(writer, record)
 			if floatPrice, err := strconv.ParseFloat(strPrice, 32); err == nil {
 				sum += floatPrice
@@ -77,11 +80,11 @@ func writeInFile(writer *csv.Writer, record []string) {
 	checkError("Cannot write to file", err)
 }
 
-func inTargetStops(targetStops *[3]string, departure, destination string) bool {
+func inTargetStops(targetStops []string, departure, destination string) bool {
 	return contains(targetStops, departure) || contains(targetStops, destination)
 }
 
-func contains(array *[3]string, str string) bool {
+func contains(array []string, str string) bool {
 	for _, value := range array {
 		if value == str {
 			return true
@@ -94,4 +97,12 @@ func checkError(message string, err error) {
 	if err != nil {
 		log.Fatal(message, err)
 	}
+}
+
+func getEnv(key, fallback string) string {
+	value := os.Getenv(key)
+	if len(value) == 0 {
+		return fallback
+	}
+	return value
 }
